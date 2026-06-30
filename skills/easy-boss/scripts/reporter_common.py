@@ -5,6 +5,7 @@ import os
 import secrets
 import time
 import sys
+import uuid
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -49,7 +50,10 @@ def normalize_server_url(value: str) -> str:
 
 
 def make_topic() -> str:
-    return "codex-report-" + secrets.token_urlsafe(18).replace("_", "x").replace("-", "z")
+    timestamp = time.strftime("%Y%m%d%H%M%S", time.gmtime())
+    random_part = secrets.token_hex(24)
+    machine_part = uuid.uuid4().hex[:12]
+    return f"codex-report-{timestamp}-{machine_part}-{random_part}"
 
 
 def make_public_ntfy_config(server_url: str = DEFAULT_SERVER_URL, topic: str | None = None) -> dict[str, Any]:

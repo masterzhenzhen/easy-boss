@@ -10,11 +10,11 @@ This skill does not require the user to own a VPS or have ntfy preinstalled. At 
 python scripts/setup_notifications.py --task "<short task>" --action "<current action>"
 ```
 
-By default, setup creates a fresh ntfy Topic and report URL for the new task. Use `--reuse` only when the user explicitly wants to keep the previous report URL.
+By default, setup creates a fresh high-entropy ntfy Topic and report URL for the new task. Topic names include a UTC timestamp plus cryptographic randomness to avoid collisions across users. Use `--reuse` only when the user explicitly wants to keep the previous report URL.
 
 The setup script will:
 
-- Generate a new random `ntfy.sh` topic for each new long task.
+- Generate a new high-entropy `ntfy.sh` topic for each new long task.
 - Save it locally in the user's config directory.
 - Print a Codex chat start-work message with the current task, current action, report link, ntfy subscription details, bundled Android APK path, and report frequency.
 - Avoid sending a test notification unless `--test` is explicitly used.
