@@ -3,9 +3,9 @@ name: easy-boss
 description: Break long Codex tasks into small checkpoints and keep the user updated with concise mobile or web progress reports. Use when a task is long-running, multi-step, likely to involve many tool calls, may continue while the user is away, or when the user asks for phone notifications, progress reports, checkpoint updates, task slicing, automatic work reporting, or setup of a notification connection.
 ---
 
-# Easy Boss v0
+# Easy Boss v0.1
 
-Version: `v0`
+Version: `v0.1`
 
 Use this skill to turn a long task into visible, low-anxiety progress: plan it, set up a notification channel if needed, execute in checkpoints, and send short reports only when they are useful.
 

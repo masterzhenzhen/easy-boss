@@ -1,4 +1,4 @@
 interface:
-  display_name: "Easy Boss v0"
+  display_name: "Easy Boss v0.1"
   short_description: "Auto-slice long tasks and set up progress reports"
   default_prompt: "Use $easy-boss to split this long task into checkpoints, set up a report link, and send progress updates."

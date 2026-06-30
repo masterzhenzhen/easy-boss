@@ -1,4 +1,4 @@
-# Easy Boss v0
+﻿# Easy Boss v0.1
 
 Easy Boss is a Codex skill for long-running tasks. It splits broad work into token-aware checkpoints and sends quiet progress reports to a phone or web link through ntfy.
 
@@ -64,3 +64,4 @@ This APK is a third-party ntfy app build. See `THIRD_PARTY_NOTICES.md` before re
 ## License
 
 Easy Boss code and skill text are released under the MIT License. The bundled ntfy Android APK is third-party software and remains under its upstream license terms.
+
