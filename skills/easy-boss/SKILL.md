@@ -13,9 +13,10 @@ Use this skill to turn a long task into visible, low-anxiety progress: plan it, 
 
 Before substantial long-running work, ensure the user has a way to receive reports.
 
-1. Run `python scripts/setup_notifications.py --task "<short task>" --action "<current action>"` from this skill directory if no notification channel is known for this user.
+1. Run `python scripts/setup_notifications.py --task "<short task>" --action "<current action>"` from this skill directory at the start of each new long task. This creates a fresh ntfy Topic and report URL by default.
 2. Paste the printed start-work message into the Codex chat immediately. It must say work has started, what Codex is executing, which mobile app/web link can show reports, the bundled Android APK path, and the report frequency.
 3. Continue the task after setup; do not send a routine mobile start notification and do not wait for the user unless the task explicitly requires confirmation.
+4. Use `--reuse` only when the user explicitly wants to continue using the previous task's report URL.
 
 If setup has already been done and the user needs the connection link again, run:
 

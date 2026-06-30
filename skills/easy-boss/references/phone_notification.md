@@ -4,15 +4,17 @@ Use this reference when the task requires mobile or web progress reports.
 
 ## Default no-server mode
 
-This skill does not require the user to own a VPS or have ntfy preinstalled. On first use, run setup with a task/action description:
+This skill does not require the user to own a VPS or have ntfy preinstalled. At the start of each new long task, run setup with a task/action description:
 
 ```bash
 python scripts/setup_notifications.py --task "<short task>" --action "<current action>"
 ```
 
+By default, setup creates a fresh ntfy Topic and report URL for the new task. Use `--reuse` only when the user explicitly wants to keep the previous report URL.
+
 The setup script will:
 
-- Generate a random `ntfy.sh` topic.
+- Generate a new random `ntfy.sh` topic for each new long task.
 - Save it locally in the user's config directory.
 - Print a Codex chat start-work message with the current task, current action, report link, ntfy subscription details, bundled Android APK path, and report frequency.
 - Avoid sending a test notification unless `--test` is explicitly used.
