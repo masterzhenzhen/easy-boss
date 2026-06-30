@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import secrets
 import time
 import sys
@@ -40,6 +41,10 @@ def state_path() -> Path:
     return config_dir() / "state.json"
 
 
+def watchdog_log_path() -> Path:
+    return config_dir() / "watchdog.log"
+
+
 def normalize_server_url(value: str) -> str:
     value = value.strip().rstrip("/")
     if not value:
@@ -51,9 +56,9 @@ def normalize_server_url(value: str) -> str:
 
 def make_topic() -> str:
     timestamp = time.strftime("%Y%m%d%H%M%S", time.gmtime())
-    random_part = secrets.token_hex(24)
-    machine_part = uuid.uuid4().hex[:12]
-    return f"codex-report-{timestamp}-{machine_part}-{random_part}"
+    random_part = secrets.token_hex(12)
+    machine_part = uuid.uuid4().hex[:8]
+    return f"codex-{timestamp}-{machine_part}-{random_part}"
 
 
 def make_public_ntfy_config(server_url: str = DEFAULT_SERVER_URL, topic: str | None = None) -> dict[str, Any]:
@@ -97,6 +102,60 @@ def save_state(state: dict[str, Any]) -> Path:
     return path
 
 
+def update_state(**values: Any) -> dict[str, Any]:
+    state = load_state()
+    state.update(values)
+    save_state(state)
+    return state
+
+
+def start_task_state(task: str = "这个长任务") -> None:
+    now = int(time.time())
+    update_state(
+        task=task,
+        task_active=True,
+        task_started_at=now,
+        last_progress_at=now,
+        last_sent_at=0,
+        sent_count=0,
+        history=[],
+        watchdog_stop=False,
+    )
+
+
+def mark_progress() -> None:
+    update_state(last_progress_at=int(time.time()))
+
+
+def stop_task_state() -> None:
+    update_state(task_active=False, watchdog_stop=True)
+
+
+def is_process_running(pid: int) -> bool:
+    if pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except OSError:
+        return False
+    return True
+
+
+def remember_watchdog(pid: int) -> None:
+    update_state(watchdog_pid=pid, watchdog_stop=False)
+
+
+def stop_existing_watchdog() -> None:
+    state = load_state()
+    pid = int(state.get("watchdog_pid", 0) or 0)
+    update_state(watchdog_stop=True)
+    if pid and is_process_running(pid):
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except OSError:
+            pass
+
+
 def should_send(min_interval_seconds: int, force: bool = False) -> tuple[bool, int]:
     if force or min_interval_seconds <= 0:
         return True, 0
@@ -129,6 +188,7 @@ def mark_sent(title: str = "", message: str = "") -> None:
     })
     history = prune_history(history, sent_count)
     state["last_sent_at"] = now
+    state["last_progress_at"] = now
     state["sent_count"] = sent_count
     state["history"] = history
     save_state(state)
@@ -211,6 +271,7 @@ def connection_instructions(config: dict[str, Any], path: Path | None = None, ta
    https://apps.apple.com/app/ntfy/id1625396347
 
 汇报频率：普通进度最多每 5 分钟 1 次；超过 10 分钟没消息会发心跳；完成、卡住或需要你确认时会立刻通知。
+后台守护：已启动自动兜底汇报；如果 Codex 忘记汇报，超过 10 分钟会自动发送“仍在处理”。
 
 {config_line}
 """

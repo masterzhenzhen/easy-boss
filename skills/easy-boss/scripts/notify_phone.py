@@ -6,7 +6,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from reporter_common import connection_instructions, ensure_config, ntfy_publish, print_error, should_send
+from reporter_common import connection_instructions, ensure_config, mark_progress, ntfy_publish, print_error, should_send, stop_task_state
 
 
 def main() -> int:
@@ -21,6 +21,7 @@ def main() -> int:
     parser.add_argument("--force", action="store_true", help="send immediately, bypassing the routine report cooldown")
     parser.add_argument("--task", default="这个长任务", help="short description used when printing connection instructions")
     parser.add_argument("--action", default="继续执行当前阶段", help="current action used when printing connection instructions")
+    parser.add_argument("--final", action="store_true", help="mark the task complete/blocked and stop the heartbeat watchdog after sending")
     args = parser.parse_args()
 
     config, created, path = ensure_config(server_url=args.server_url, topic=args.topic, reset=args.reset)
@@ -37,6 +38,10 @@ def main() -> int:
     except Exception as exc:
         print_error(str(exc))
         return 1
+
+    mark_progress()
+    if args.final:
+        stop_task_state()
 
     if created:
         print("通知通道已自动创建，且本次消息已发送。", file=sys.stderr)

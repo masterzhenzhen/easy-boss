@@ -14,7 +14,7 @@ Use this skill to turn a long task into visible, low-anxiety progress: plan it, 
 Before substantial long-running work, ensure the user has a way to receive reports.
 
 1. Run `python scripts/setup_notifications.py --task "<short task>" --action "<current action>"` from this skill directory at the start of each new long task. This creates a fresh, high-entropy ntfy Topic and report URL by default.
-2. Paste the printed start-work message into the Codex chat immediately. It must say work has started, what Codex is executing, which mobile app/web link can show reports, the bundled Android APK path, and the report frequency.
+2. Paste the printed start-work message into the Codex chat immediately. It must say work has started, what Codex is executing, which mobile app/web link can show reports, the bundled Android APK path, the report frequency, and that the watchdog is active.
 3. Continue the task after setup; do not send a routine mobile start notification and do not wait for the user unless the task explicitly requires confirmation.
 4. Use `--reuse` only when the user explicitly wants to continue using the previous task's report URL.
 
@@ -47,7 +47,7 @@ Send notifications only at these moments:
 Respect the frequency window:
 
 - Send routine progress reports at most once every 5 minutes.
-- If work continues with no report for 10 minutes, send a brief heartbeat even if the current stage is not finished.
+- If work continues with no report for 10 minutes, the background watchdog sends a brief heartbeat even if Codex forgets.
 - Send stuck, user-confirmation, blocked, and final-complete messages immediately with `--force`.
 - Do not notify merely because work has started; the first non-setup notification should be a completed stage, stuck request, or heartbeat after 10 minutes.
 - Keep only a small local send history; after every 4 successfully sent messages, delete the oldest stored record.
@@ -136,10 +136,10 @@ python scripts/notify_phone.py "Codex: 阶段完成" "当前小阶段已完成�
 Use forced sending for final completion, stuck, blocked, or confirmation-needed messages:
 
 ```bash
-python scripts/notify_phone.py "Codex: 完成" "任务已完成，请回到对话查看结果。" --force
+python scripts/notify_phone.py "Codex: 完成" "任务已完成，请回到对话查看结果。" --force --final
 ```
 
-Use heartbeat only when 10 minutes pass without any report while work is still active:
+Manual heartbeat is rarely needed because setup starts `scripts/watchdog.py` in the background. Use it only if watchdog failed to start:
 
 ```bash
 python scripts/notify_phone.py "Codex: 仍在处理" "我还在当前阶段工作，暂无需要你操作的事项。" --force
@@ -165,7 +165,7 @@ When a command fails:
 
 1. Diagnose locally with the least disruptive read-only checks.
 2. Retry only when the cause is clear or the retry is harmless.
-3. If the checkpoint still has no meaningful progress after diagnosis or a harmless retry, send a `Codex: 卡住了` report with `--force` and request user confirmation.
+3. If the checkpoint still has no meaningful progress after diagnosis or a harmless retry, send a `Codex: 卡住了` report with `--force --final` and request user confirmation.
 4. Keep the final chat concise: state what failed, what was tried, and what the user should do next.
 
 Never modify unrelated systems simply to make progress. For live servers, avoid changing firewall, proxy, SSH, billing, or account settings unless the user explicitly asked for that operation.

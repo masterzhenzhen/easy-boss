@@ -17,6 +17,7 @@ The setup script will:
 - Generate a new high-entropy `ntfy.sh` topic for each new long task.
 - Save it locally in the user's config directory.
 - Print a Codex chat start-work message with the current task, current action, report link, ntfy subscription details, bundled Android APK path, and report frequency.
+- Start a background watchdog that sends a heartbeat if no report is sent for 10 minutes.
 - Avoid sending a test notification unless `--test` is explicitly used.
 
 The user can receive updates in these ways:
@@ -32,8 +33,8 @@ Send only after a small-stage task completes, when stuck, when user confirmation
 Frequency rules:
 
 - Routine stage reports are limited to once every 5 minutes by default.
-- If work continues for 10 minutes without any report, send a heartbeat with `--force`.
-- Final completion, stuck, blocked, and confirmation-needed messages should use `--force`.
+- If work continues for 10 minutes without any report, the background watchdog sends a heartbeat automatically.
+- Final completion, stuck, blocked, and confirmation-needed messages should use `--force --final` to stop the watchdog.
 - Local send history is pruned automatically: after every 4 successful sends, the oldest stored record is removed.
 
 Preferred command from the skill directory:
@@ -45,7 +46,7 @@ python scripts/notify_phone.py "Codex 工作汇报" "当前进度一句话"
 Forced immediate send:
 
 ```bash
-python scripts/notify_phone.py "Codex: 完成" "任务已完成，请回到对话查看结果。" --force
+python scripts/notify_phone.py "Codex: 完成" "任务已完成，请回到对话查看结果。" --force --final
 ```
 
 From Windows PowerShell with an absolute path:
